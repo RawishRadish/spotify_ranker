@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const db = require('../db');
 const {isAccessTokenValid} = require('./spotify_authorization');
@@ -27,11 +28,13 @@ router.get('/playlists', async (req, res) => {
 
 // Post all playlists from the user to the database
 router.post('/playlists', async (req, res) => {
-    const token = req.session.spotifyAccessToken;
+    const spotifyToken = req.cookies.spotifyAccessToken;
+    const decodedUserToken = jwt.verify(req.cookies.accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decodedUserToken.id;
 
     try {
         const response = await axios.get('https://api.spotify.com/v1/me/playlists', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${spotifyToken}` }
         });
         const playlists = response.data.items;
 
@@ -55,8 +58,7 @@ router.post('/playlists', async (req, res) => {
                 console.log('Playlist:', name, 'Length:', playlistLength);
                 const playlistImageUrl = images && images.length > 0 ? images[0].url : null;
                 console.log('Image URL:', playlistImageUrl);
-                const userId = req.session.userId;
-
+                
                 await client.query(playlistInsert, [id, name, playlistLength, playlistImageUrl, userId]);
             }
 

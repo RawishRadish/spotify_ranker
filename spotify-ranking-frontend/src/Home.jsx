@@ -9,7 +9,7 @@ const Home = () => {
 
     return (
         <div>
-            <h1>Spotify Wanker</h1>
+            <h1>Spotify Ranker</h1>
 
             {!isLoggedIn && <LoginForm/>}
 

@@ -22,7 +22,7 @@ const LoginForm = () => {
             await api.post('auth/login', {username, password });
             await checkUserAuthState(); //Check log in state
         } catch (error) {
-            if (error.response && error.response.status === 400) {
+            if (error.response && error.response.status === 401) {
                 if (error.response.data === 'Invalid username') {
                     setError('Onjuiste gebruikersnaam');
                 } else if (error.response.data === 'Invalid password') {

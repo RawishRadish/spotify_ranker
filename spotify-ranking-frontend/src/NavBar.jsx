@@ -4,7 +4,7 @@ import { useAuth } from './UserAuthContext';
 import api from './axiosConfig';
 
 const NavBar = () => {
-    const { isLoggedIn, setIsLoggedIn } = useAuth();
+    const { isLoggedIn, setIsLoggedIn, user } = useAuth();
   
     const handleLogout = async () => {
       try {
@@ -22,6 +22,7 @@ const NavBar = () => {
         <Link className="nav-item" to="/">Home</Link>
         <Link className="nav-item" to="/compare">Compare</Link>
         <Link className="nav-item" to="/ranking">Ranking</Link>
+        <p>User: { user }</p>
         {isLoggedIn && (
           <button className="nav-item" onClick={handleLogout}>Logout</button>
         )}

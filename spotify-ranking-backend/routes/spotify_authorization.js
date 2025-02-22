@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const db = require('../db');
 
 // Check if access token is still valid
@@ -17,6 +18,7 @@ async function isAccessTokenValid (accessToken) {
 }
 
 router.get('/login', (req, res) => {
+    console.log('Redirecting to Spotify login');
     const authURL = `https://accounts.spotify.com/authorize?` +
     `client_id=${process.env.SPOTIFY_CLIENT_ID}` +
     `&response_type=code` + 
@@ -28,7 +30,11 @@ router.get('/login', (req, res) => {
 
 router.get('/callback', async (req, res) => {
     const { code } = req.query;
-    console.log(req.session.userId);
+    const decodedUserToken = jwt.verify(req.cookies.accessToken, process.env.ACCESS_TOKEN_SECRET);
+    console.log('User token used in callback:', decodedUserToken);
+    const userId = decodedUserToken.id;
+    console.log('User ID used in callback:', userId);
+
     try {
         const params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
@@ -44,8 +50,12 @@ router.get('/callback', async (req, res) => {
         });
 
         const { access_token, refresh_token } = response.data;
-        req.session.spotifyAccessToken = access_token;
-        await db.query(`UPDATE users SET spotify_refresh_token = $1 WHERE id = $2`, [refresh_token, req.session.userId]);
+
+        res.cookie('spotifyAccessToken', access_token, {
+            httpOnly: true, secure: false, sameSite: 'None'
+        });
+
+        await db.query(`UPDATE users SET spotify_refresh_token = $1 WHERE id = $2`, [refresh_token, userId]);
         console.log('Access token retrieved', access_token);
 
         res.redirect('/spotify/get-id');
@@ -58,16 +68,19 @@ router.get('/callback', async (req, res) => {
 
 // Get Spotify user id and save in database
 router.get('/get-id', async (req, res) => {
-    const token = req.session.spotifyAccessToken;
+    const spotifyToken = req.cookies.spotifyAccessToken;
+    const decodedUserToken = jwt.verify(req.cookies.accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decodedUserToken.id;
 
     try {
         const response = await axios.get('https://api.spotify.com/v1/me', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${spotifyToken}` }
         });
 
         const spotifyId = response.data.id;
-        await db.query(`UPDATE users SET spotify_id = $1 WHERE id = $2`, [spotifyId, req.session.userId]);
+        await db.query(`UPDATE users SET spotify_id = $1 WHERE id = $2`, [spotifyId, userId]);
         console.log('Spotify user id retrieved and saved:', spotifyId);
+        console.log('On user:', userId);
 
         res.redirect('http://localhost:5173');
     } catch (error) {

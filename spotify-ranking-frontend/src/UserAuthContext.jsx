@@ -8,6 +8,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const [user, setUser] = useState(null);
 
     //Function to renew access token
     const refreshAccessToken = async () => {
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }) => {
             if (response.status === 200) {
                 console.log('Access token refreshed!');
                 setIsLoggedIn(true);
+                setUser(response.data.userId);
             }
         } catch (error) {
             console.error('Vernieuwen van access token mislukt:', error);
@@ -34,6 +36,7 @@ export const AuthProvider = ({ children }) => {
             if (response.status === 200) {
                 console.log('User is authenticated/logged in');
                 setIsLoggedIn(true);
+                setUser(response.data.userId);
                 return true;
             }
         } catch (error) {
@@ -72,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, checkUserAuthState, logoutUser, setIsLoggedIn, refreshAccessToken }}>
+        <AuthContext.Provider value={{ isLoggedIn, checkUserAuthState, logoutUser, setIsLoggedIn, refreshAccessToken, user }}>
             {children}
         </AuthContext.Provider>
     );
