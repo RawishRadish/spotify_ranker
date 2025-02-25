@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import api from './axiosConfig';
-import { useAuth } from './UserAuthContext';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from './context/UserAuthContext';
 
 const LoginForm = () => {
-    const { checkUserAuthState } = useAuth();
+    const { login } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -19,18 +18,10 @@ const LoginForm = () => {
         setIsLoggingIn(true);
 
         try {
-            await api.post('auth/login', {username, password });
-            await checkUserAuthState(); //Check log in state
+            await login(username, password);
         } catch (error) {
-            if (error.response && error.response.status === 401) {
-                if (error.response.data === 'Invalid username') {
-                    setError('Onjuiste gebruikersnaam');
-                } else if (error.response.data === 'Invalid password') {
-                    setError('Onjuist wachtwoord');
-                }
-            } else {
-                setError('Er is een fout opgetreden');
-            }
+            console.error('Error logging in:', error);
+            setError('Er is iets misgegaan bij het inloggen. Probeer het opnieuw.');
         } finally {
             setIsLoggingIn(false);
         }

@@ -1,23 +1,19 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from './context/UserAuthContext';
 import { useEffect } from 'react';
-import { useAuth } from './UserAuthContext';
 
 const ProtectedRoute = ({ children }) => {
-    const { isLoggedIn, isCheckingAuth } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
+    const { user, loading, checkAuth } = useAuth();
 
     useEffect(() => {
-        if (!isCheckingAuth && !isLoggedIn) {
-            navigate('/', { replace: true, state: { from: location } });
-        }
-    }, [isLoggedIn, isCheckingAuth, navigate, location]);
+        checkAuth();
+    }, []);
 
-    if (isCheckingAuth) {
+    if (loading) {
         return <div>Checking authentication...</div>;
     }
 
-    return isLoggedIn ? children : null;
+    return user?.loggedIn ? children : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

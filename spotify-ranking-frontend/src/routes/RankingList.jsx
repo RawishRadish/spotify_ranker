@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import api from './axiosConfig';
-import { useAuth } from './UserAuthContext';
-import { usePlaylist } from './PlaylistContext';
+import api from '../axiosConfig';
+import { useAuth } from '../context/UserAuthContext';
+import { usePlaylist } from '../context/PlaylistContext';
 import { FixedSizeList as List } from 'react-window';
 import './RankingList.css';
 
@@ -32,14 +32,17 @@ const RankingList = () => {
     );
 
     return (
-        <List
-            height={600} // Height of the list container
-            itemCount={songs.length} // Number of items in the list
-            itemSize={45} // Height of each item
-            width={400} // Width of the list container
-        >
-            {Row}
-        </List>
+        <>
+            <h2>Ranking</h2>
+            <List
+                height={600} // Height of the list container
+                itemCount={songs.length} // Number of items in the list
+                itemSize={45} // Height of each item
+                width={400} // Width of the list container
+            >
+                {Row}
+            </List>
+        </>
     );
 };
 

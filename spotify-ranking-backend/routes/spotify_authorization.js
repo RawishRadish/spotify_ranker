@@ -18,12 +18,7 @@ async function isAccessTokenValid (accessToken) {
 }
 
 router.get('/login', (req, res) => {
-    console.log('Redirecting to Spotify login');
-    const authURL = `https://accounts.spotify.com/authorize?` +
-    `client_id=${process.env.SPOTIFY_CLIENT_ID}` +
-    `&response_type=code` + 
-    `&redirect_uri=${process.env.REDIRECT_URI}` +
-    `&scope=user-read-private playlist-read-private`;
+    
 
     res.json(authURL);
 });

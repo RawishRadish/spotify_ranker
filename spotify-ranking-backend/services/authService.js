@@ -4,11 +4,17 @@ const jwt = require('jsonwebtoken');
 
 // Generate JWT tokens
 const generateAccessToken = (user) => {
-    return jwt.sign({ username: user.username, id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    return jwt.sign(
+        { username: user.username, id: user.id },
+        process.env.ACCESS_TOKEN_SECRET, 
+        { expiresIn: '15m' });
 };
 
 const generateRefreshToken = (user) => {
-    return jwt.sign({ username: user.username, id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    return jwt.sign(
+        { username: user.username, id: user.id }, 
+        process.env.REFRESH_TOKEN_SECRET, 
+        { expiresIn: '7d' });
 };
 
 // Find user by username
@@ -21,18 +27,40 @@ const getUserByUsername = async (username) => {
 const login = async (username, password) => {
     const user = await getUserByUsername(username);
 
-    if (!user || (!await bcrypt.compare(password, user.password))) {
-        throw new Error('Invalid username or password');
+    if (!user) {
+        throw new Error('Invalid username');
+    } 
+    if (!await bcrypt.compare(password, user.password)) {
+        throw new Error('Invalid password');
     }
 
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    await db.query(`UPDATE users SET user_refresh_token = $1 WHERE id = $2`, [refreshToken, user.id]);
+
     return {
-        accessToken: generateAccessToken(user),
-        refreshToken: generateRefreshToken(user),
+        accessToken,
+        refreshToken,
     };
 };
 
+// Logout user
+const logout = async (refreshToken) => {
+    if (!refreshToken) {
+        return;
+    }
+
+    try {
+        // Delete refresh token from database
+        await db.query(`UPDATE users SET user_refresh_token = NULL WHERE user_refresh_token = $1`, [refreshToken]);
+    } catch (error) {
+        console.error('Error logging out user:', error);
+    }
+}
+
 // Refresh token function
-const refreshToken = async (refreshToken) => {
+const refreshUserToken = async (refreshToken) => {
     if (!refreshToken) {
         throw new Error('No refresh token provided');
     }
@@ -43,9 +71,19 @@ const refreshToken = async (refreshToken) => {
 
             const dbUser = await db.query(`SELECT username, id FROM users WHERE id = $1`, [user.id]);
 
-            resolve(generateAccessToken(dbUser.rows[0]));
+            const newRefreshToken = generateRefreshToken(dbUser.rows[0]);
+
+            await db.query(`UPDATE users SET user_refresh_token = $1 WHERE id = $2`, [newRefreshToken, dbUser.rows[0].id]);
+
+            const newAccessToken = generateAccessToken(dbUser.rows[0]);
+
+            resolve({
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+                username: dbUser.rows[0].username
+            });
         });
     });
 };
 
-module.exports = { login, refreshToken };
+module.exports = { login, logout, refreshUserToken };

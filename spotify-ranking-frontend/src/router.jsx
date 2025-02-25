@@ -1,8 +1,8 @@
-import { createBrowserRouter, RouterProvider, redirect } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import Home from "./Home";
-import CompareSongs from "./compareSongs";
-import RankingList from "./RankingList";
+import Home from "./routes/Home";
+import CompareSongs from "./routes/compareSongs";
+import RankingList from "./routes/RankingList";
 import ProtectedRoute from "./ProtectedRoute";
 
 // Define the routes

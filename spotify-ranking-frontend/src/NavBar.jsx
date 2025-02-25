@@ -1,33 +1,44 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from './UserAuthContext';
-import api from './axiosConfig';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/UserAuthContext';
+import { useSpotifyAuth } from './context/SpotifyAuthContext';
+import './NavBar.css';
 
 const NavBar = () => {
-    const { isLoggedIn, setIsLoggedIn, user } = useAuth();
+    const { user, logout } = useContext(AuthContext);
+    const { spotifyUser, connectSpotify } = useSpotifyAuth();
+    const navigate = useNavigate();
   
     const handleLogout = async () => {
       try {
-        await api
-    .post('/auth/logout');
+        await logout();
         console.log('Logged out');
-        setIsLoggedIn(false);
+        navigate('/'); // Redirect to home page
       } catch (error) {
         console.error('Error logging out:', error);
       }
     };
-  
+
     return (
       <nav>
         <Link className="nav-item" to="/">Home</Link>
         <Link className="nav-item" to="/compare">Compare</Link>
         <Link className="nav-item" to="/ranking">Ranking</Link>
-        <p>User: { user }</p>
-        {isLoggedIn && (
+        {user?.loggedIn && (
+          <>
+          <div className="nav-item">
+            {spotifyUser?.connected ? (
+              <p>Connected to Spotify as {spotifyUser.username}</p>
+            ) : (
+              <button onClick={() => connectSpotify(user)}>Connect to Spotify</button>
+            )}
+          </div>
+          <p className="nav-item">User: { user.username }</p>
           <button className="nav-item" onClick={handleLogout}>Logout</button>
+          </>
         )}
       </nav>
-    )
-  }
+    );
+  };
 
 export default NavBar;
