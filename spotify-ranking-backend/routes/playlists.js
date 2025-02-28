@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const cors = require('cors');
 const db = require('../db');
 const {isAccessTokenValid} = require('./spotify_authorization');
 

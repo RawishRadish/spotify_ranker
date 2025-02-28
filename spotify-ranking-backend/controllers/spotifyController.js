@@ -1,4 +1,5 @@
-const spotifyService = require('../services/spotifyService');
+const spotifyTokenService = require('../services/spotifyTokenService');
+const { setSpotifyAccessToken } = require('../config/spotifyConfig');
 const db = require('../db');
 
 const getSpotifyAuthURL = async (req, res) => {
@@ -25,13 +26,16 @@ const handleSpotifyCallback = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: 'User not authenticated, please reconnect' });
         }
-        const tokens = await spotifyService.exchangeCodeForTokens(code);
+        const tokens = await spotifyTokenService.exchangeCodeForTokens(code);
 
         if (!tokens.access_token || !tokens.refresh_token) {
             return res.status(400).json({ error: 'No tokens received from Spotify' });
         }
 
-        const spotifyUserId = await spotifyService.getSpotifyUserId(tokens.access_token);
+        const spotifyUserId = await spotifyTokenService.getSpotifyUserId(tokens.access_token);
+
+        // Save access token as default for axios requests
+        setSpotifyAccessToken(tokens.access_token);
 
         // Save tokens and Spotify ID in database
         await db.query(
@@ -43,23 +47,6 @@ const handleSpotifyCallback = async (req, res) => {
         );
 
         res.redirect(process.env.FRONTEND_URL);
-
-        // // Save refresh token in database
-        // await db.query(
-        //     `UPDATE users
-        //     SET spotify_refresh_token = $1
-        //     WHERE id = $2`,
-        //     [tokens.refresh_token, userId]
-        // );
-        // res.cookie('spotifyRefreshToken', tokens.refresh_token, {
-        //     httpOnly: true,
-        //     secure: false,
-        //     sameSite: 'None'
-        // });
-        // res.json({
-        //     message: 'Spotify authorization successful',
-        //     spotifyAccessToken: tokens.access_token,
-        // });
     } catch (error) {
         console.error('Callback error:', error);
         res.status(500).send('Error retrieving access token from Spotify');
