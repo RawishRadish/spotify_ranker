@@ -28,6 +28,10 @@ router.get('/playlists', async (req, res) => {
 // Post all playlists from the user to the database
 router.post('/playlists', async (req, res) => {
     const spotifyToken = req.cookies.spotifyAccessToken;
+    const userToken = req.cookies.accessToken;
+    if (!userToken) {
+        return res.status(401).send('No user token found in cookies');
+    }
     const decodedUserToken = jwt.verify(req.cookies.accessToken, process.env.ACCESS_TOKEN_SECRET);
     const userId = decodedUserToken.id;
 
@@ -155,54 +159,6 @@ router.post('/playlists/:id/songs', async (req, res) => {
         res.status(500).send('Error retrieving songs');
     }
 });
-
-// router.post('/playlists', async (req, res) => {
-//     const token = req.headers.authorization.split(' ')[1];
-//     const playlistId = req.body.playlistId;
-
-//     try {
-//         const response = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-//             headers: { Authorization: `Bearer ${token}` }
-//         });
-
-//         const {id, name, tracks } = response.data;
-
-//         //Sla de playlist op in de database
-//         const client = await db.connect();
-//         try {
-//             await client.query('BEGIN');
-
-//             //Playlist opslaan
-//             const playlistInsert = `
-//                 INSERT INTO playlists (id, playlist_name, user_id) VALUES ($1, $2, $3)
-//                 ON CONFLICT (id) DO NOTHING
-//             `;
-//             await client.query(playlistInsert, [id, name, 1]);
-
-//             //Nummers opslaan
-//             const trackInsert = `
-//                 INSERT INTO songs (spotify_song_id, title, artist, playlist_id)
-//                 VALUES ($1, $2, $3, $4)
-//                 ON CONFLICT (id) DO NOTHING
-//             `;
-//             for (const item of tracks.items) {
-//                 const track = item.track;
-//                 await client.query(trackInsert, [ track.id, track.name, track.artists[0].name, id ]);
-//             }
-
-//             await client.query('COMMIT');
-//             res.status(200).send('Playlist saved');
-//         } catch (error) {
-//             await client.query('ROLLBACK');
-//             throw error;
-//         } finally {
-//             client.release();
-//         }
-//     } catch (error) {
-//         console.error('Error saving playlist:', error);
-//         res.status(500).send('Error saving playlist');
-//     }
-// });
 
 //Delete a playlist from the database
 router.delete('/playlists/:id', async (req, res) => {

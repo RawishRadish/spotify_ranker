@@ -1,9 +1,11 @@
 const { spotifyApi } = require('../config/spotifyConfig');
 
-const getSpotifyUserId = async (accessToken) => {
-    console.log('Getting Spotify user ID');
-    const response = await spotifyApi.get('https://api.spotify.com/v1/me', {
-        headers: { Authorization: `Bearer ${accessToken}` }
+const getSpotifyUserId = async (userId) => {
+    console.log('Getting Spotify user ID for user: ', userId);
+    const response = await spotifyApi.get('/me', {
+        headers: {
+            'X-User-ID': userId,
+        }
     });
     return response.data.id;
 };

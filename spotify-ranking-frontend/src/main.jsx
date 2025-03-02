@@ -8,7 +8,7 @@ import { RouterProvider } from 'react-router-dom';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ // <StrictMode>
     <AuthProvider>
       <SpotifyAuthProvider>
         <PlaylistProvider>
@@ -16,5 +16,5 @@ createRoot(document.getElementById('root')).render(
         </PlaylistProvider>
       </SpotifyAuthProvider>
     </AuthProvider>
-  </StrictMode>,
+ // </StrictMode>,
 );

@@ -42,22 +42,9 @@ const login = async (username, password) => {
     return {
         accessToken,
         refreshToken,
+        userId: user.id,
     };
 };
-
-// Logout user
-const logout = async (refreshToken) => {
-    if (!refreshToken) {
-        return;
-    }
-
-    try {
-        // Delete refresh token from database
-        await db.query(`UPDATE users SET user_refresh_token = NULL WHERE user_refresh_token = $1`, [refreshToken]);
-    } catch (error) {
-        console.error('Error logging out user:', error);
-    }
-}
 
 // Refresh token function
 const refreshUserToken = async (refreshToken) => {
@@ -80,10 +67,25 @@ const refreshUserToken = async (refreshToken) => {
             resolve({
                 accessToken: newAccessToken,
                 refreshToken: newRefreshToken,
-                username: dbUser.rows[0].username
+                username: dbUser.rows[0].username,
+                userId: dbUser.rows[0].id,
             });
         });
     });
 };
+
+// Logout user
+const logout = async (refreshToken) => {
+    if (!refreshToken) {
+        return;
+    }
+
+    try {
+        // Delete refresh token from database
+        await db.query(`UPDATE users SET user_refresh_token = NULL WHERE user_refresh_token = $1`, [refreshToken]);
+    } catch (error) {
+        console.error('Error logging out user:', error);
+    }
+}
 
 module.exports = { login, logout, refreshUserToken };

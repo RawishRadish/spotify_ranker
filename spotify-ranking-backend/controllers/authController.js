@@ -1,9 +1,10 @@
 const authService = require('../services/authService');
+const { setSpotifyAccessToken } = require('../config/spotifyConfig');
 
 const login = async (req, res) => {
     try {
         const { username, password } = req.body;
-        const { accessToken, refreshToken } = await authService.login(username, password);
+        const { accessToken, refreshToken, userId } = await authService.login(username, password);
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
@@ -18,7 +19,7 @@ const login = async (req, res) => {
 
 const refreshUserToken = async (req, res) => {
     try {
-        const { accessToken, refreshToken, username } = await authService.refreshUserToken(req.cookies.refreshToken);
+        const { accessToken, refreshToken, username, } = await authService.refreshUserToken(req.cookies.refreshToken);
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
@@ -35,7 +36,9 @@ const logout = async (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
 
     await authService.logout(refreshToken);
+    req.session.destroy();
     res.clearCookie('refreshToken');
+    setSpotifyAccessToken(null);
     res.sendStatus(204);
 };
 

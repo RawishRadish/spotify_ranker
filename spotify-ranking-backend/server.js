@@ -6,10 +6,10 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const pool = require('./db');
 const app = express();
-const playlistRoute = require('./routes/playlists');
+const playlistRoutes = require('./routes/playlistRoutes');
 const rankingRoute = require('./routes/ranking');
 const userAuthRoutes = require('./routes/authRoutes');
-const spotifyAuthRoutes = require('./routes/spotifyRoutes');
+const spotifyAuthRoutes = require('./routes/spotifyAuthRoutes');
 const { authenticateToken } = require('./middlewares/authMiddleware');
 
 app.use(express.json());
@@ -20,8 +20,8 @@ app.use(cors({
 }));
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {secure: false } // secure: true in production
 }));
 
@@ -45,7 +45,7 @@ app.get('/test-auth', authenticateToken, (req, res) => {
     res.json(req.user);
 });
 
-app.use('/api', playlistRoute);
+app.use('/spotify', playlistRoutes);
 app.use('/spotify', spotifyAuthRoutes);
 app.use('/api', rankingRoute);
 app.use('/auth', userAuthRoutes);

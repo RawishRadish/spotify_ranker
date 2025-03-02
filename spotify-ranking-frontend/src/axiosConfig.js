@@ -24,7 +24,9 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !isRefreshing) {
             isRefreshing = true;
             try {
+                console.log('Trying to refresh access token');
                 const { data } = await api.post('/auth/refresh');
+                console.log('New access token:', data.accessToken);
                 setAuthToken(data.accessToken);
                 isRefreshing = false;
                 return api.request(error.config);

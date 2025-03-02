@@ -24,7 +24,7 @@ const PlaylistSelect =  () => {
 
     const importPlaylists = async () => {
         try {
-            const response = await api.post('/api/playlists');
+            const response = await api.post('/spotify/playlists');
             console.log('Playlists imported in database');
         } catch (error) {
             console.error('Error importing playlistss:', error);
@@ -38,7 +38,7 @@ const PlaylistSelect =  () => {
     useEffect(() => {
         const fetchPlaylists = async () => {
             try {
-                const response = await api.get('/api/playlists');
+                const response = await api.get('/spotify/playlists');
                 setPlaylists(response.data);
             } catch (error) {
                 console.error('Error fetching playlists:', error);
