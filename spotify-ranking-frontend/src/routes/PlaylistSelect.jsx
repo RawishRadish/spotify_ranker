@@ -9,7 +9,7 @@ const PlaylistSelect =  () => {
     const selectPlaylist = async (playlistId) => {
         setPlaylistId(playlistId);
         try {
-            await api.post(`/api/playlists/${playlistId}/songs`);
+            await api.post(`/spotify/playlists/${playlistId}/songs`);
         } catch (error) {
             console.error('Error importing songs:', error);
             if (error.response && error.response.status === 401) {

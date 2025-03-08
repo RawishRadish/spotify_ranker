@@ -25,7 +25,20 @@ const savePlaylists = async (req, res) => {
     }
 };
 
+const savePlaylistSongs = async (req, res) => {
+    const playlistId = req.params.id;
+    try {
+        const allTracks = await playlistService.getPlaylistSongs(playlistId);
+        await playlistService.savePlaylistSongsToDb(allTracks, playlistId);
+        res.status(201).send('Songs saved');
+    } catch (error) {
+        console.error('Error saving songs:', error);
+        res.status(500).send('Error saving songs');
+    }
+}
+
 module.exports = {
     getAllPlaylists,
-    savePlaylists
+    savePlaylists,
+    savePlaylistSongs
 };

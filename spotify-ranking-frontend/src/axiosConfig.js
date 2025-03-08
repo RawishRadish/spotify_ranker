@@ -21,6 +21,7 @@ let isRefreshing = false; // Flag to prevent multiple refresh requests
 api.interceptors.response.use(
     (response) => response, // Return a successful response
     async (error) => {
+        const originalRequest = error.config;
         if (error.response?.status === 401 && !isRefreshing) {
             isRefreshing = true;
             try {
@@ -28,8 +29,9 @@ api.interceptors.response.use(
                 const { data } = await api.post('/auth/refresh');
                 console.log('New access token:', data.accessToken);
                 setAuthToken(data.accessToken);
+                originalRequest.headers['Authorization'] = `Bearer ${data.accessToken}`;
                 isRefreshing = false;
-                return api.request(error.config);
+                return api.request(originalRequest);
             } catch (refreshError) {
                 isRefreshing = false;
                 console.error('Session expired. Please log in again.');

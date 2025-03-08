@@ -9,7 +9,8 @@ const generateSpotifyAuthUrl = () => {
         client_id: process.env.SPOTIFY_CLIENT_ID,
         response_type: 'code',
         redirect_uri: process.env.REDIRECT_URI,
-        scope: 'user-read-private playlist-read-private'
+        scope: 'user-read-private playlist-read-private',
+        show_dialog: true,
     };
     const authURL = `https://accounts.spotify.com/authorize?${querystring.stringify(queryParams)}`;
     return authURL;

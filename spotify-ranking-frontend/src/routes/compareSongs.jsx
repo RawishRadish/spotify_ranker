@@ -15,7 +15,7 @@ function CompareSongs() {
         // Fetch pairs
         async function fetchPairs() {
             try {
-                const response = await api.get(`/api/pairs/${playlistId}`);
+                const response = await api.get(`/pairs/fetch/${playlistId}`);
                 console.log('Fetched pairs:', response.data);
                 setPairs(response.data);
             } catch (error) {
@@ -29,7 +29,7 @@ function CompareSongs() {
         console.log('User chose:', winnerId, 'over', loserId);
 
         //Send choice to backend
-        api.post(`/api/pairs/compare/${playlistId}`, { winnerId, loserId })
+        api.post(`/pairs/compare/${playlistId}`, { winner_id: winnerId, loser_id: loserId })
             .then(() => {
                 if (currentPairIndex < pairs.length - 1) {
                     setCurrentPairIndex(currentPairIndex + 1);

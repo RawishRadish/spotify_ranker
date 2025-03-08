@@ -7,7 +7,7 @@ const session = require('express-session');
 const pool = require('./db');
 const app = express();
 const playlistRoutes = require('./routes/playlistRoutes');
-const rankingRoute = require('./routes/ranking');
+const compareRoutes = require('./routes/compareRoutes');
 const userAuthRoutes = require('./routes/authRoutes');
 const spotifyAuthRoutes = require('./routes/spotifyAuthRoutes');
 const { authenticateToken } = require('./middlewares/authMiddleware');
@@ -47,7 +47,7 @@ app.get('/test-auth', authenticateToken, (req, res) => {
 
 app.use('/spotify', playlistRoutes);
 app.use('/spotify', spotifyAuthRoutes);
-app.use('/api', rankingRoute);
+app.use('/pairs', compareRoutes);
 app.use('/auth', userAuthRoutes);
 
 const PORT = process.env.PORT || 3000;

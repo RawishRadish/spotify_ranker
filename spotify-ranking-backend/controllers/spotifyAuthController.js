@@ -51,7 +51,8 @@ const handleSpotifyCallback = async (req, res) => {
         res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
         console.error('Callback error:', error);
-        res.status(500).send('Error retrieving access token from Spotify');
+        const errorMessage = error.response ? error.response.data.error : 'Error handling Spotify callback';
+        res.redirect(`${process.env.FRONTEND_URL}/?error_message=${errorMessage}`);
     }
 };
 
