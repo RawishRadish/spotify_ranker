@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../axiosConfig';
 import { usePlaylist } from '../context/PlaylistContext';
-import './PlaylistSelect.css';
 
 const PlaylistSelect =  () => {
     const { playlistId, setPlaylistId } = usePlaylist();

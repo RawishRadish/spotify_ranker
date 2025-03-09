@@ -1,6 +1,7 @@
 const db = require('../db');
 const { spotifyApi } = require('../config/spotifyConfig');
 
+// Fetch all playlists from the database
 const getAllPlaylistsFromDb = async (userId) => {
     const client = await db.connect();
     try {
@@ -14,10 +15,12 @@ const getAllPlaylistsFromDb = async (userId) => {
     }
 };
 
+// Save playlists to the database
 const savePlaylistsToDb = async (playlists, userId) => {
     const client = await db.connect();
     try {
         await client.query('BEGIN');
+        // Basic insert query for the playlists
         const playlistInsert = `
             INSERT INTO playlists (id, playlist_name, playlist_length, playlist_image_url, user_id)
             VALUES ($1, $2, $3, $4, $5)
@@ -27,7 +30,7 @@ const savePlaylistsToDb = async (playlists, userId) => {
                 playlist_image_url = EXCLUDED.playlist_image_url,
                 user_id = EXCLUDED.user_id
         `;
-
+        // For each playlist, insert or update the playlist
         for (const playlist of playlists) {
             const { id, name, tracks, images } = playlist;
             const playlistLength = tracks.total;
@@ -57,6 +60,7 @@ const getPlaylistSongs = async (playlistId) => {
                 params: { offset, limit }
             });
 
+            // Add the items to the allTracks array
             const { items } = response.data;
             allTracks.push(...items);
 
@@ -77,12 +81,13 @@ const savePlaylistSongsToDb = async (allTracks, playlistId) => {
     const client = await db.connect();
     try {
         await client.query('BEGIN');
+        // Basic insert query for the songs
         const trackInsert = `
             INSERT INTO songs (spotify_song_id, title, artist, playlist_id)
             VALUES ($1, $2, $3, $4)
             ON CONFLICT (spotify_song_id, playlist_id) DO NOTHING
         `;
-
+        // For each track, insert the track
         for (const track of allTracks) {
             const { id, name, artists } = track.track;
             const artist = artists.map(artist => artist.name).join(', ');
@@ -107,10 +112,28 @@ const savePlaylistSongsToDb = async (allTracks, playlistId) => {
     }
 };
 
+// Fetch the playlist from the database in descending order of elo_rating (Best songs first)
+const getRankedPlaylist = async (playlistId) => {
+    const client = await db.connect();
+    try {
+        const result = await client.query(`
+            SELECT id, title, artist, elo_rating
+            FROM songs
+            WHERE playlist_id = $1
+            ORDER BY elo_rating DESC;
+            `, [playlistId]);
+        return result.rows;
+    } catch (error) {
+        console.error('Error fetching ranked playlist:', error);
+        throw new Error('Error fetching ranked playlist');
+    }
+}
+
 // Export the functions
 module.exports = {
     getAllPlaylistsFromDb,
     savePlaylistsToDb,
     getPlaylistSongs,
-    savePlaylistSongsToDb
+    savePlaylistSongsToDb,
+    getRankedPlaylist
 };

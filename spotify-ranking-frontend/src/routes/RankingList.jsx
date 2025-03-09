@@ -2,47 +2,30 @@ import React, { useState, useEffect } from 'react';
 import api from '../axiosConfig';
 import { useAuth } from '../context/UserAuthContext';
 import { usePlaylist } from '../context/PlaylistContext';
-import { FixedSizeList as List } from 'react-window';
-import './RankingList.css';
+import RankingTable from './RankingTable';
 
 const RankingList = () => {
-    const { isLoggedIn } = useAuth();
     const [songs, setSongs] = useState([]);
     const { playlistId } = usePlaylist();
 
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await api.get(`/api/ranked/${playlistId}`);
+                const response = await api.get(`/spotify/playlists/${playlistId}/ranked`);
                 setSongs(response.data);
             } catch (error) {
                 console.error('Error fetching songs:', error);
             }
         };
 
-        if (isLoggedIn) {
-            fetchSongs();
-        }
-    }, [isLoggedIn, playlistId]);
-
-    const Row = ({ index, style }) => (
-        <div className="songrow" style={style}>
-            {songs[index].title} - {songs[index].artist}
-        </div>
-    );
+        fetchSongs();
+    }, [playlistId]);
 
     return (
-        <>
-            <h2>Ranking</h2>
-            <List
-                height={600} // Height of the list container
-                itemCount={songs.length} // Number of items in the list
-                itemSize={45} // Height of each item
-                width={400} // Width of the list container
-            >
-                {Row}
-            </List>
-        </>
+        <div className='p-4'>
+            <h2 className='text-2xl font-bold mb-4 text-gray-800'>Ranking</h2>
+            <RankingTable songs={songs} />
+        </div>
     );
 };
 

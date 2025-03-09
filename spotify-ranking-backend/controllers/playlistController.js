@@ -1,6 +1,7 @@
 const { spotifyApi } = require('../config/spotifyConfig');
 const playlistService = require('../services/playlistService');
 
+// Fetch all playlists from the database
 const getAllPlaylists = async (req, res) => {
     const userId = req.user.id;
     try {
@@ -12,6 +13,7 @@ const getAllPlaylists = async (req, res) => {
     }
 };
 
+// Save all playlists from the Spotify user to the database
 const savePlaylists = async (req, res) => {
     const userId = req.user.id;
     try {
@@ -25,6 +27,7 @@ const savePlaylists = async (req, res) => {
     }
 };
 
+// Save all songs from a playlist to the database
 const savePlaylistSongs = async (req, res) => {
     const playlistId = req.params.id;
     try {
@@ -37,8 +40,22 @@ const savePlaylistSongs = async (req, res) => {
     }
 }
 
+// Get the playlist ranked by elo rating (best to worst)
+const getRankedPlaylist = async (req, res) => {
+    const { playlist_id } = req.params;
+    try {
+        const rankedTracks = await playlistService.getRankedPlaylist(playlist_id);
+        res.json(rankedTracks);
+    } catch (error) {
+        console.error('Error fetching ranked playlist:', error);
+        res.status(500).json({ error: 'Error fetching ranked playlist' });
+    }
+};
+
+// Export the functions
 module.exports = {
     getAllPlaylists,
     savePlaylists,
-    savePlaylistSongs
+    savePlaylistSongs,
+    getRankedPlaylist
 };

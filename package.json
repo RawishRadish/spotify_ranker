@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently -n backend,frontend -c yellow,green \"npm run start --prefix ./spotify-ranking-backend\" \"npm start --prefix ./spotify-ranking-frontend\"",
+    "start": "concurrently -n backend,frontend -c yellow,green \"npm run backend\" \"npm run frontend\"",
+    "frontend": "npm start --prefix ./spotify-ranking-frontend -- --host",
+    "backend": "npm run start --prefix ./spotify-ranking-backend",
     "server": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

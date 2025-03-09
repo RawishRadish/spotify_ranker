@@ -6,5 +6,6 @@ const { authenticateToken } = require('../middlewares/authMiddleware');
 router.get('/playlists', authenticateToken, playlistController.getAllPlaylists);
 router.post('/playlists', authenticateToken, playlistController.savePlaylists);
 router.post('/playlists/:id/songs', authenticateToken, playlistController.savePlaylistSongs);
+router.get('/playlists/:playlist_id/ranked', authenticateToken, playlistController.getRankedPlaylist);
 
 module.exports = router;
