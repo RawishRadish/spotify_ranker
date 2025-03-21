@@ -45,6 +45,7 @@ app.get('/test-auth', authenticateToken, (req, res) => {
     res.json(req.user);
 });
 
+
 app.use('/spotify', playlistRoutes);
 app.use('/spotify', spotifyAuthRoutes);
 app.use('/pairs', compareRoutes);

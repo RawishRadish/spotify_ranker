@@ -40,7 +40,7 @@ const savePlaylistSongs = async (req, res) => {
     }
 }
 
-// Get the playlist ranked by elo rating (best to worst)
+// Get the playlist ranked by openskill rating (best to worst)
 const getRankedPlaylist = async (req, res) => {
     const { playlist_id } = req.params;
     try {

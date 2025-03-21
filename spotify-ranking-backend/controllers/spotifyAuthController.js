@@ -61,6 +61,7 @@ const checkSpotifyToken = async (req, res) => {
     try {
         const userId = req.user.id;
         const response = await spotifyService.getSpotifyUserId(userId);
+        // console.log('Spotify user:', response);
         res.json(response);
     } catch (error) {
         console.error('Error checking Spotify token:', error);
@@ -68,6 +69,7 @@ const checkSpotifyToken = async (req, res) => {
     }
 };
 
+// Refresh Spotify access token
 const refreshSpotifyToken = async (req, res) => {
     console.log('Refreshing Spotify access token');
     console.log('User:', req.headers['x-user-id']);
@@ -85,4 +87,21 @@ const refreshSpotifyToken = async (req, res) => {
     res.json({ accessToken: newAccessToken });
 }
 
-module.exports = { getSpotifyAuthURL, handleSpotifyCallback, checkSpotifyToken, refreshSpotifyToken };
+// Get token from database
+const getSpotifyTokenFromDb = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+    }
+    console.log('User authenticated:', req.user);
+
+    const accessToken = await spotifyAuthService.getSpotifyAccessToken(req.user.id);
+    res.json({ access_token: accessToken });
+}
+
+module.exports = { 
+    getSpotifyAuthURL,
+    handleSpotifyCallback,
+    checkSpotifyToken,
+    refreshSpotifyToken,
+    getSpotifyTokenFromDb
+};

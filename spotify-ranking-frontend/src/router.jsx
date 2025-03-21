@@ -13,7 +13,7 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <Home /> },
             { path: '/compare', element: <ProtectedRoute><CompareSongs /></ProtectedRoute> },
-            { path: '/ranking', element: <ProtectedRoute><RankingList /></ProtectedRoute> }
+            { path: '/ranking', element: <ProtectedRoute><RankingList /></ProtectedRoute> },
         ]
     }
 ]);

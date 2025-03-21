@@ -44,8 +44,20 @@ export const SpotifyAuthProvider = ({ children }) => {
         }
     };
 
+    const fetchToken = async (user) => {
+        try {
+            const response = await api.get('/spotify/token', {
+                params: { user: user },
+            });
+            console.log("Spotify token ontvangen:", response.data);
+            return response.data.access_token;
+        } catch (error) {
+            console.error('Error fetching Spotify token:', error);
+        }
+    };
+
     return (
-        <SpotifyAuthContext.Provider value={{ spotifyUser, connectSpotify, spotifyLoading }}>
+        <SpotifyAuthContext.Provider value={{ spotifyUser, connectSpotify, fetchToken, spotifyLoading }}>
             {children}
         </SpotifyAuthContext.Provider>
     );

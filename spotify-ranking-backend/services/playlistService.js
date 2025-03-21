@@ -112,15 +112,15 @@ const savePlaylistSongsToDb = async (allTracks, playlistId) => {
     }
 };
 
-// Fetch the playlist from the database in descending order of elo_rating (Best songs first)
+// Fetch the playlist from the database in descending order of openskill rating (Best songs first)
 const getRankedPlaylist = async (playlistId) => {
     const client = await db.connect();
     try {
         const result = await client.query(`
-            SELECT id, title, artist, elo_rating
+            SELECT id, title, artist, mu, sigma
             FROM songs
             WHERE playlist_id = $1
-            ORDER BY elo_rating DESC;
+            ORDER BY mu DESC;
             `, [playlistId]);
         return result.rows;
     } catch (error) {
@@ -128,6 +128,23 @@ const getRankedPlaylist = async (playlistId) => {
         throw new Error('Error fetching ranked playlist');
     }
 }
+
+// Calculate standard deviation of elo ratings to determine stability of the ratings
+const getStandardDeviation = async (playlistId) => {
+    try {
+        const stdDevResult = await db.query(`
+            SELECT STDDEV(elo_rating) AS elo_std_dev
+            FROM songs
+            WHERE playlist_id = $1
+        )`, [playlistId]);
+        return stdDevResult.rows[0].elo_std_dev;
+    } catch (error) {
+        console.error('Error fetching standard deviation:', error);
+        throw new Error('Error fetching standard deviation');
+    }
+}
+
+
 
 // Export the functions
 module.exports = {
