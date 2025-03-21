@@ -14,7 +14,6 @@ const PreviewSongPlayer = ({ song }) => {
                     songs: [song]
                 });
                 console.log('Preview URL:', response.data);
-                console.log('Preview URL of first song:', response.data[0][0].previewUrls[0]);
                 setPreviewUrl(response.data[0][0].previewUrls[0]);
             } catch (error) {
                 console.error('Error fetching preview URL:', error);
@@ -22,7 +21,7 @@ const PreviewSongPlayer = ({ song }) => {
         }
 
         fetchPreviewUrl(song);
-    }, []);
+    }, [song]);
 
     const togglePlay = () => {
         if (audioRef) {
@@ -38,8 +37,8 @@ const PreviewSongPlayer = ({ song }) => {
     return (
         <div className='flex items-center gap-4'>
             <audio ref={audioRef} src={previewUrl} />
-            <button onClick={togglePlay}>
-                {isPlaying ? <FaRegPauseCircle /> : <FaRegPlayCircle className="text-green-600 text-2xl" />}
+            <button className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium transition-all" onClick={togglePlay}>
+                {isPlaying ? <FaRegPauseCircle /> : <FaRegPlayCircle />} Preview
             </button>
         </div>
     );

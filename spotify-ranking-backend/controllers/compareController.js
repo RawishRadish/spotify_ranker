@@ -56,9 +56,33 @@ const getPreviewUrl = async (req, res) => {
     res.json(previews);
 };
 
+// Find album art of songs
+const getAlbumArtUrl = async (req, res) => {
+    const { song } = req.body;
+    if (!song) {
+        return res.status(400).json({ error: 'No song provided' });
+    }
+
+    const albumArtUrl = await previewService.getAlbumArtUrl(song);
+    res.json(albumArtUrl);
+};
+
+// Find external URL of songs
+const getExternalUrl = async (req, res) => {
+    const { song } = req.body;
+    if (!song) {
+        return res.status(400).json({ error: 'No song provided' });
+    }
+
+    const externalUrl = await previewService.getExternalUrl(song);
+    res.json(externalUrl);
+};
+
 module.exports = {
     getSongPairs,
     compareSongs,
     undoComparison,
-    getPreviewUrl
+    getPreviewUrl,
+    getAlbumArtUrl,
+    getExternalUrl
 };
