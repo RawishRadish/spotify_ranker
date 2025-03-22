@@ -38,7 +38,39 @@ const PlaylistSelect =  () => {
         const fetchPlaylists = async () => {
             try {
                 const response = await api.get('/spotify/playlists');
-                setPlaylists(response.data);
+                const basePlaylists = response.data;
+                console.log('Base playlists:', basePlaylists);
+
+                const testFetchPlaylistInfo = async () => {
+                    try {
+                        const response = await api.get(`/spotify/playlists/${basePlaylists[0].id}`);
+                        console.log('Playlist:', response.data);
+                    } catch (error) {
+                        console.error('Error fetching playlist info:', error);
+                    }
+                }
+
+                // const playlistsWithImages = await Promise.all(
+                //     basePlaylists.map(async (playlist) => {
+                //         try {
+                //             console.log('Fetching playlist image for:', playlist.id);
+                //             const res = await api.get(`/spotify/playlists/${playlist.id}`);
+                //             console.log('Playlist:', res.data);
+                //             return {
+                //                 ...playlist,
+                //                 imageUrl: res.data.images[0].url
+                //             };
+                //         } catch (error) {
+                //             console.error('Error fetching playlist image:', error);
+                //             return {
+                //                 ...playlist,
+                //                 imageUrl: null
+                //             };
+                //         }
+                //     })
+                // );
+                setPlaylists(basePlaylists);
+                testFetchPlaylistInfo();
             } catch (error) {
                 console.error('Error fetching playlists:', error);
             }

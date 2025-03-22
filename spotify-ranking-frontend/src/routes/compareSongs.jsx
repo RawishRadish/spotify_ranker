@@ -88,11 +88,14 @@ function CompareSongs() {
 
     return (
         <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-4 py-8'>
-            <div className='flex flex-col md:flex-row items-center justify-center gap-6 w-full max-w-screen-lg'>
-                <SongCard song={currentPair.song1} opponent={currentPair.song2} onChoose={handleChoice} />
-                <span className='text-xl font-semibold'> vs. </span>
-                <SongCard song={currentPair.song2} opponent={currentPair.song1} onChoose={handleChoice} />
-
+            <div className='relative w-full max-w-screen-lg px-4'>
+                <div className='grid grid-cols-1 grid-rows-[1fr_auto_1fr] md:grid-rows-1 md:grid-cols-[2fr_auto_2fr] place-items-center gap-6 w-full max-w-screen-lg auto-rows-fr'>
+                    <SongCard song={currentPair.song1} opponent={currentPair.song2} onChoose={handleChoice} />
+                    <span className='bg-white text-gray-700 text-sm font-bold px-4 py-2 rounded-full shadow-md border border-gray-300'>
+                    VS
+                    </span>
+                    <SongCard song={currentPair.song2} opponent={currentPair.song1} onChoose={handleChoice} />
+                </div>
             </div>
 
             {/* Buttons */}
@@ -105,14 +108,6 @@ function CompareSongs() {
                         Undo
                     </button>
                 )}
-
-                <button
-                    className='mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all text-md'
-                    onClick={getPreviewUrls}
-                >
-                    Log preview URLs
-                </button>
-                <button onClick={getAlbumArtUrl}>Get album art</button>
             </div>
 
         </div>

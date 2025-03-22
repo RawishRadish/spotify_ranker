@@ -12,7 +12,7 @@ const getSpotifyAuthURL = async (req, res) => {
     req.session.userId = req.user.id;
 
     try {
-        const authURL = await spotifyAuthService.generateSpotifyAuthUrl();
+        const authURL = spotifyAuthService.generateSpotifyAuthUrl();
         res.json({ authURL });
     } catch (error) {
         res.status(500).json({ message: 'Error getting Spotify auth URL' });

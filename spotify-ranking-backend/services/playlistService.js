@@ -129,18 +129,14 @@ const getRankedPlaylist = async (playlistId) => {
     }
 }
 
-// Calculate standard deviation of elo ratings to determine stability of the ratings
-const getStandardDeviation = async (playlistId) => {
+// Get information about a single playlist
+const getPlaylistInfo = async (playlistId) => {
     try {
-        const stdDevResult = await db.query(`
-            SELECT STDDEV(elo_rating) AS elo_std_dev
-            FROM songs
-            WHERE playlist_id = $1
-        )`, [playlistId]);
-        return stdDevResult.rows[0].elo_std_dev;
+        console.log('Fetching playlist info for:', playlistId);
+        const response = await spotifyApi.get(`/playlists/${playlistId}`);
+        return response.data;
     } catch (error) {
-        console.error('Error fetching standard deviation:', error);
-        throw new Error('Error fetching standard deviation');
+        console.error('Error fetching playlist info:', error);
     }
 }
 
@@ -152,5 +148,6 @@ module.exports = {
     savePlaylistsToDb,
     getPlaylistSongs,
     savePlaylistSongsToDb,
-    getRankedPlaylist
+    getRankedPlaylist,
+    getPlaylistInfo,
 };

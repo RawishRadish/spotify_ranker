@@ -52,10 +52,25 @@ const getRankedPlaylist = async (req, res) => {
     }
 };
 
+// Get information about a single playlist
+const getPlaylistInfo = async (req, res) => {
+    console.log('Request came in for playlist: ', req.params.id);
+    const { id: playlistId } = req.params;
+    try {
+        const response = await playlistService.getPlaylistInfo(playlistId);
+        console.log('Fetched Spotify data for playlist:', playlistId);
+        return response.data;
+    } catch (error) {
+        console.error('Error in controller:', error);
+        res.status(500).json({ error: 'Error fetching playlist info' });
+    }
+}
+
 // Export the functions
 module.exports = {
     getAllPlaylists,
     savePlaylists,
     savePlaylistSongs,
-    getRankedPlaylist
+    getRankedPlaylist,
+    getPlaylistInfo,
 };

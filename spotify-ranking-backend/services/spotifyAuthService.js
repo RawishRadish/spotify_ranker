@@ -53,6 +53,9 @@ const getSpotifyRefreshToken = async (userId) => {
         FROM users
         WHERE id = $1`, [userId]
     );
+    if (response.rows.length === 0) {
+        throw new Error('No refresh token found');
+    }
     return response.rows[0].spotify_refresh_token;
 };
 

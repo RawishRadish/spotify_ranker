@@ -20,16 +20,26 @@ app.use(cors({
 }));
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: true,
-    saveUninitialized: true,
-    cookie: {secure: false } // secure: true in production
+    saveUninitialized: false,
+    resave: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+        secure: false 
+    } // secure: true in production
 }));
 
 
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Spotify Ranking API');
+    console.log(req.session);
+    console.log(req.session.id);
 });
+
+app.get('/session-test', (req, res) => {
+    req.session.test = 'Hello, session!';
+    res.send('Session set');
+})
 
 app.get('/test-db', async (req, res) => {
     try {
