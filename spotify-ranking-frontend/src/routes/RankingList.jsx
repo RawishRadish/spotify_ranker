@@ -11,7 +11,7 @@ const RankingList = () => {
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await api.get(`/spotify/playlists/${playlistId}/ranked`);
+                const response = await api.get(`/playlists/${playlistId}/ranked`);
                 setSongs(response.data);
             } catch (error) {
                 console.error('Error fetching songs:', error);

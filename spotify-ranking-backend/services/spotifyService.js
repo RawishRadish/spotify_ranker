@@ -1,13 +1,11 @@
-const { spotifyApi } = require('../config/spotifyConfig');
+const spotifyRequest = require('../middlewares/spotifyRequest');
 
-const getSpotifyUserId = async (userId) => {
-    console.log('Getting Spotify user ID for user: ', userId);
-    const response = await spotifyApi.get('/me', {
-        headers: {
-            'X-User-ID': userId,
-        }
-    });
-    return response.data.id;
+const getSpotifyUserId = async (req) => {
+    console.log('Getting Spotify user ID for user: ', req.session.userId);
+
+    const data = await spotifyRequest(req, 'me');
+
+    return data.id;
 };
 
 module.exports = {

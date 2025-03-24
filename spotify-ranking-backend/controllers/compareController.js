@@ -63,7 +63,7 @@ const getAlbumArtUrl = async (req, res) => {
         return res.status(400).json({ error: 'No song provided' });
     }
 
-    const albumArtUrl = await previewService.getAlbumArtUrl(song);
+    const albumArtUrl = await previewService.getAlbumArtUrl(req, song);
     res.json(albumArtUrl);
 };
 
@@ -74,7 +74,7 @@ const getExternalUrl = async (req, res) => {
         return res.status(400).json({ error: 'No song provided' });
     }
 
-    const externalUrl = await previewService.getExternalUrl(song);
+    const externalUrl = await previewService.getExternalUrl(req, song);
     res.json(externalUrl);
 };
 

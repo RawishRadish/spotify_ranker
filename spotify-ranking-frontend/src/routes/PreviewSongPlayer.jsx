@@ -1,37 +1,60 @@
 import React, { useState, useRef, useEffect } from 'react';
 import api from '../axiosConfig';
-import { FaRegPlayCircle, FaRegPauseCircle, FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause } from "react-icons/fa";
+import { useAudio } from '../context/AudioContext';
 
 
 const PreviewSongPlayer = ({ song }) => {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying ] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
+    const { play, stop, currentPlayingId } = useAudio();
 
     useEffect(() => {
-        const fetchPreviewUrl = async (song) => {
+        const fetchPreviewUrl = async () => {
             try {
                 const response = await api.post('/pairs/preview', {
                     songs: [song]
                 });
-                console.log('Preview URL:', response.data);
                 setPreviewUrl(response.data[0][0].previewUrls[0]);
             } catch (error) {
                 console.error('Error fetching preview URL:', error);
             }
-        }
+        };
 
-        fetchPreviewUrl(song);
+        fetchPreviewUrl();
     }, [song]);
 
-    const togglePlay = () => {
-        if (audioRef) {
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
-                audioRef.current.play();
+    useEffect(() => {
+        setIsPlaying(currentPlayingId === song.id);
+    }, [currentPlayingId, song.id]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        const handleEnded = () => {
+            setIsPlaying(false);
+        };
+
+        if (audio) {
+            audio.addEventListener('ended', handleEnded);
+        }
+
+        return () => {
+            if (audio) {
+                audio.removeEventListener('ended', handleEnded);
             }
-            setIsPlaying(!isPlaying);
+        };
+    }, []);
+
+    const togglePlay = () => {
+        if (!audioRef.current) return;
+                
+        if (isPlaying) {
+            stop();
+            setIsPlaying(false);
+        } else {
+            play(song.id, audioRef.current);
+            setIsPlaying(true);
         }
     };
 

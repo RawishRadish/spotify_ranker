@@ -3,7 +3,7 @@ import api from '../axiosConfig';
 import { AuthContext } from './UserAuthContext';
 
 //Create context
-const SpotifyAuthContext = createContext();
+export const SpotifyAuthContext = createContext();
 
 //Share state with all components
 export const SpotifyAuthProvider = ({ children }) => {

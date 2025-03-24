@@ -1,6 +1,6 @@
 const spotifyPreviewFinder = require('spotify-preview-finder');
 const db = require('../db');
-const { spotifyApi } = require('../config/spotifyConfig');
+const spotifyRequest = require('../middlewares/spotifyRequest');
 
 // Function to get the preview URL of a song
 const getPreviewUrl = async (songs) => {
@@ -16,7 +16,7 @@ const getPreviewUrl = async (songs) => {
 };
 
 // Fetch the album art URL of a song
-const getAlbumArtUrl = async (song) => {
+const getAlbumArtUrl = async (req, song) => {
     const spotifyIdResult = await db.query(`
         SELECT spotify_song_id
         FROM songs
@@ -24,23 +24,23 @@ const getAlbumArtUrl = async (song) => {
         `, [song.id]);
 
     const spotifyId = spotifyIdResult.rows[0].spotify_song_id;
-    const result = await spotifyApi.get(`/tracks/${spotifyId}`);
-    console.log('Album art:', result.data.album.images[0].url);
-    return result.data.album.images[0].url;
+    const result = await spotifyRequest(req, `tracks/${spotifyId}`);
+    console.log('Album art:', result.album.images[0].url);
+    return result.album.images[0].url;
 }
 
 // Fetch the external URL of a song
-const getExternalUrl = async (song) => {
+const getExternalUrl = async (req, song) => {
     const spotifyIdResult = await db.query(`
         SELECT spotify_song_id
         FROM songs
         WHERE id = $1;
         `, [song.id]);
 
-    const spotifyId = spotifyIdResult.rows[0].spotify_song_id;
-    const result = await spotifyApi.get(`/tracks/${spotifyId}`);
-    console.log('External URL:', result.data.external_urls.spotify);
-    return result.data.external_urls.spotify;
+    const spotifySongId = spotifyIdResult.rows[0].spotify_song_id;
+    const result = await spotifyRequest(req, `tracks/${req, spotifySongId}`);
+    console.log('External URL:', result.external_urls.spotify);
+    return result.external_urls.spotify;
 }
 
 // Export the functions

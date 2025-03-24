@@ -3,10 +3,12 @@ const router = express.Router();
 const playlistController = require('../controllers/playlistController');
 const { authenticateToken } = require('../middlewares/authMiddleware');
 
-router.get('/playlists', authenticateToken, playlistController.getAllPlaylists);
-router.get('/playlists/:id', authenticateToken, playlistController.getPlaylistInfo);
-router.post('/playlists', authenticateToken, playlistController.savePlaylists);
-router.post('/playlists/:id/songs', authenticateToken, playlistController.savePlaylistSongs);
-router.get('/playlists/:playlist_id/ranked', authenticateToken, playlistController.getRankedPlaylist);
+router.get('/getfromdb', authenticateToken, playlistController.getAllPlaylists);
+router.get('/info/:id', authenticateToken, playlistController.getPlaylistInfo);
+router.post('/save', authenticateToken, playlistController.savePlaylists);
+router.post('/save/:id/songs', authenticateToken, playlistController.savePlaylistSongs);
+router.get('/ranked/:playlist_id', authenticateToken, playlistController.getRankedPlaylist);
+
+router.get('/fetch', authenticateToken, playlistController.getPlaylists);
 
 module.exports = router;

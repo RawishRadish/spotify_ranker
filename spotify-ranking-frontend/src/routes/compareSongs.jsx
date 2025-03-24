@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../axiosConfig';
 import { usePlaylist } from '../context/PlaylistContext';
-import PreviewSongPlayer from './PreviewSongPlayer';
+import { useAudio } from '../context/AudioContext';
 import SongCard from './SongCard';
 
 function CompareSongs() {
@@ -9,6 +9,7 @@ function CompareSongs() {
     const [currentPairIndex, setCurrentPairIndex] = useState(0);
     const [lastChoice, setLastChoice] = useState(null);
     const { playlistId } = usePlaylist();
+    const { stop } = useAudio();
 
     useEffect(() => {
         // Reset pairs to empty array
@@ -27,6 +28,8 @@ function CompareSongs() {
     }, [playlistId]);
 
     const handleChoice = (winnerId, loserId) => {
+        // Stop audio if playing
+        stop();
         console.log('User chose:', winnerId, 'over', loserId);
         // Save last choice for undo functionality
         setLastChoice({ winnerId, loserId });
@@ -59,32 +62,6 @@ function CompareSongs() {
     }
 
     const currentPair = pairs[currentPairIndex];
-
-    const getPreviewUrls = async () => {
-        console.log(currentPair);
-        const { song1, song2 } = currentPair;
-        console.log('Getting preview URLs for:', `${song1.title} - ${song1.artist}, ${song2.title} - ${song2.artist}`);
-        try {
-            const response = await api.post('/pairs/preview', {
-                songs: [song1, song2],
-            });
-            console.log('Preview URLs:', response.data);
-        } catch (error) {
-            console.error('Error getting preview URLs:', error);
-        }
-    };
-
-    const getAlbumArtUrl = async () => {
-        console.log('Getting album art for:', currentPair.song1);
-        try {
-            const response = await api.post('/pairs/album-art', {
-                song: currentPair.song1,
-            });
-            console.log('Album art URL:', response.data);
-        } catch (error) {
-            console.error('Error getting album art:', error);
-        }
-    }
 
     return (
         <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-4 py-8'>

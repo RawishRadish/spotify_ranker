@@ -93,6 +93,7 @@ const refreshSpotifyToken = async (refreshToken) => {
         const newAccessToken = response.data.access_token;
         const newRefreshToken = response.data.refresh_token;
         console.log('New refresh token:', newRefreshToken);
+        req.session.accessToken = newAccessToken;
         await updateSpotifyTokensInDb(newAccessToken, newRefreshToken, refreshToken);
         return newAccessToken;
     } catch (error) {

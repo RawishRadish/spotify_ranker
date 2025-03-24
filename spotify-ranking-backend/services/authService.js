@@ -23,6 +23,13 @@ const getUserByUsername = async (username) => {
     return result.rows[0];
 };
 
+// Find user by ID
+const getUserById = async (id) => {
+    const result = await db.query(`SELECT * FROM users WHERE id = $1`, [id]);
+    console.log('Searched for user ' + id + ' and found: ', result.rows[0]);
+    return result.rows[0];
+};
+
 // Login user
 const login = async (username, password) => {
     const user = await getUserByUsername(username);
@@ -88,4 +95,4 @@ const logout = async (refreshToken) => {
     }
 }
 
-module.exports = { login, logout, refreshUserToken };
+module.exports = { login, logout, refreshUserToken, getUserById };

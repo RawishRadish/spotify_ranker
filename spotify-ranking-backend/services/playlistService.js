@@ -1,5 +1,5 @@
 const db = require('../db');
-const { spotifyApi } = require('../config/spotifyConfig');
+const spotifyRequest = require('../middlewares/spotifyRequest');
 
 // Fetch all playlists from the database
 const getAllPlaylistsFromDb = async (userId) => {
@@ -12,6 +12,18 @@ const getAllPlaylistsFromDb = async (userId) => {
         throw new Error('Error getting playlists');
     } finally {
         client.release();
+    }
+};
+
+// Fetch all playlists from Spotify
+const getPlaylists = async (req) => {
+    try {
+        const response = await spotifyRequest(req, 'me/playlists');
+        console.log('First fetched playlist:', response.items[0]);
+        return response.items;
+    } catch (error) {
+        console.error('Error fetching playlists:', error);
+        throw new Error('Error fetching playlists');
     }
 };
 
@@ -48,20 +60,49 @@ const savePlaylistsToDb = async (playlists, userId) => {
     }
 };
 
+// Save a single playlist to the database
+const savePlaylistToDb = async (playlist, userId) => {
+    const client = await db.connect();
+    try {
+        await client.query('BEGIN');
+        // Basic insert query for the playlists
+        const playlistInsert = `
+            INSERT INTO playlists (id, playlist_name, playlist_length, user_id)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (id) DO UPDATE
+            SET playlist_name = EXCLUDED.playlist_name,
+                playlist_length = EXCLUDED.playlist_length,
+                user_id = EXCLUDED.user_id
+        `;
+
+        const { id, name, tracks } = playlist;
+        const playlistLength = tracks.total;
+
+        await client.query(playlistInsert, [id, name, playlistLength, userId]);
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error saving playlists:', error);
+        throw new Error('Error saving playlists');
+    } finally {
+        client.release();
+    }
+};
+
 // Get songs from a playlist
-const getPlaylistSongs = async (playlistId) => {
+const getPlaylistSongs = async (req, playlistId) => {
     let allTracks = [];
     try {
         let offset = 0;
         const limit = 100;
 
         while (true) {
-            const response = await spotifyApi.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-                params: { offset, limit }
+            const response = await spotifyRequest(req, `playlists/${playlistId}/tracks`, { 
+                params: { offset, limit } 
             });
 
             // Add the items to the allTracks array
-            const { items } = response.data;
+            const { items } = response;
             allTracks.push(...items);
 
             // If there are less than 100 items, we have reached the end of the playlist
@@ -130,11 +171,11 @@ const getRankedPlaylist = async (playlistId) => {
 }
 
 // Get information about a single playlist
-const getPlaylistInfo = async (playlistId) => {
+const getPlaylistInfo = async (req, playlistId) => {
     try {
         console.log('Fetching playlist info for:', playlistId);
-        const response = await spotifyApi.get(`/playlists/${playlistId}`);
-        return response.data;
+        const response = await spotifyRequest(req, `playlists/${playlistId}`);
+        return response;
     } catch (error) {
         console.error('Error fetching playlist info:', error);
     }
@@ -145,6 +186,8 @@ const getPlaylistInfo = async (playlistId) => {
 // Export the functions
 module.exports = {
     getAllPlaylistsFromDb,
+    getPlaylists,
+    savePlaylistToDb,
     savePlaylistsToDb,
     getPlaylistSongs,
     savePlaylistSongsToDb,

@@ -1,5 +1,5 @@
-const { spotifyApi } = require('../config/spotifyConfig');
 const playlistService = require('../services/playlistService');
+const spotifyRequest = require('../middlewares/spotifyRequest');
 
 // Fetch all playlists from the database
 const getAllPlaylists = async (req, res) => {
@@ -13,13 +13,15 @@ const getAllPlaylists = async (req, res) => {
     }
 };
 
-// Save all playlists from the Spotify user to the database
+// Save selected playlists from the Spotify user to the database
 const savePlaylists = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.session.userId;
+    const { playlistIds } = req.body;
     try {
-        const response = await spotifyApi.get('/me/playlists');
-        const playlists = response.data.items;
-        await playlistService.savePlaylistsToDb(playlists, userId);
+        for (const playlistId of playlistIds) {
+            const playlistData = await spotifyRequest(req, `playlists/${playlistId}`);
+            await playlistService.savePlaylistToDb(playlistData, userId);
+        }
         res.status(201).send('Playlists saved');
     } catch (error) {
         console.error('Error saving playlists:', error);
@@ -27,11 +29,22 @@ const savePlaylists = async (req, res) => {
     }
 };
 
+// Fetch all playlists from Spotify
+const getPlaylists = async (req, res) => {
+    try {
+        const response = await playlistService.getPlaylists(req);
+        res.json(response);
+    } catch (error) {
+        console.error('Error fetching playlists:', error);
+        res.status(500).json({ error: 'Error fetching playlists' });
+    }
+}
+
 // Save all songs from a playlist to the database
 const savePlaylistSongs = async (req, res) => {
     const playlistId = req.params.id;
     try {
-        const allTracks = await playlistService.getPlaylistSongs(playlistId);
+        const allTracks = await playlistService.getPlaylistSongs(req, playlistId);
         await playlistService.savePlaylistSongsToDb(allTracks, playlistId);
         res.status(201).send('Songs saved');
     } catch (error) {
@@ -57,9 +70,8 @@ const getPlaylistInfo = async (req, res) => {
     console.log('Request came in for playlist: ', req.params.id);
     const { id: playlistId } = req.params;
     try {
-        const response = await playlistService.getPlaylistInfo(playlistId);
-        console.log('Fetched Spotify data for playlist:', playlistId);
-        return response.data;
+        const response = await playlistService.getPlaylistInfo(req, playlistId);
+        res.json(response);
     } catch (error) {
         console.error('Error in controller:', error);
         res.status(500).json({ error: 'Error fetching playlist info' });
@@ -69,6 +81,7 @@ const getPlaylistInfo = async (req, res) => {
 // Export the functions
 module.exports = {
     getAllPlaylists,
+    getPlaylists,
     savePlaylists,
     savePlaylistSongs,
     getRankedPlaylist,

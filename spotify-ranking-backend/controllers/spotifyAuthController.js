@@ -1,6 +1,5 @@
 const spotifyAuthService = require('../services/spotifyAuthService');
 const spotifyService = require('../services/spotifyService');
-const { setSpotifyAccessToken } = require('../config/spotifyConfig');
 const db = require('../db');
 
 const getSpotifyAuthURL = async (req, res) => {
@@ -33,11 +32,16 @@ const handleSpotifyCallback = async (req, res) => {
             return res.status(400).json({ error: 'No tokens received from Spotify' });
         }
 
-        // Save access token as default for axios requests
-        setSpotifyAccessToken(tokens.access_token);
+        console.log('Tokens:', tokens);
+        
+        // Save access token in session
+        req.session.spotifyAccessToken = tokens.access_token;
+        req.session.spotifyAccessTokenExpiresAt = Date.now() + tokens.expires_in * 1000;
+
 
         // Get Spotify user ID
-        const spotifyUserId = await spotifyService.getSpotifyUserId();
+        const spotifyUserId = await spotifyService.getSpotifyUserId(req);
+        console.log('Spotify user ID luidt:', spotifyUserId);
 
         // Save tokens and Spotify ID in database
         await db.query(
@@ -59,9 +63,7 @@ const handleSpotifyCallback = async (req, res) => {
 // Check if user is authenticated
 const checkSpotifyToken = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const response = await spotifyService.getSpotifyUserId(userId);
-        // console.log('Spotify user:', response);
+        const response = await spotifyService.getSpotifyUserId(req);
         res.json(response);
     } catch (error) {
         console.error('Error checking Spotify token:', error);
