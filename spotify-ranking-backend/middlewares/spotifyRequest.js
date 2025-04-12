@@ -6,7 +6,7 @@ const spotifyRequest = async (req, endpoint, {
     data = null,
     params = {},
 } = {}) => {
-    console.log('Helper function spotifyRequest called');
+    console.log('Helper function spotifyRequest called with endpoint:', endpoint);
 
     // Check/refresh Spotify access token
     await checkSpotifyToken(req);

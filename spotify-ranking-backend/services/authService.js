@@ -30,6 +30,28 @@ const getUserById = async (id) => {
     return result.rows[0];
 };
 
+// Register user
+const register = async (username, password) => {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUser = await getUserByUsername(username);
+    if (existingUser) {
+        throw new Error('Username already exists');
+    }
+    const result = await db.query(
+        `INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id`,
+        [username, hashedPassword]
+    );
+    const userId = result.rows[0].id;
+    const accessToken = generateAccessToken({ username, id: userId });
+    const refreshToken = generateRefreshToken({ username, id: userId });
+    await db.query(`UPDATE users SET user_refresh_token = $1 WHERE id = $2`, [refreshToken, userId]);
+    return {
+        accessToken,
+        refreshToken,
+        userId,
+    };
+}
+
 // Login user
 const login = async (username, password) => {
     const user = await getUserByUsername(username);
@@ -95,4 +117,4 @@ const logout = async (refreshToken) => {
     }
 }
 
-module.exports = { login, logout, refreshUserToken, getUserById };
+module.exports = { register, login, logout, refreshUserToken, getUserById };

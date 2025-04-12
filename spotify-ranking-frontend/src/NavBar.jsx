@@ -34,6 +34,7 @@ const NavBar = () => {
             <Link className="hover:text-gray-300" to="/">Home</Link>
             <Link className="hover:text-gray-300" to="/compare">Compare</Link>
             <Link className="hover:text-gray-300" to="/ranking">Ranking</Link>
+            <Link className='hover:text-gray-300' to='/statistics'>Statistics</Link>
           </div>
 
           {/* User info and Logout button */}

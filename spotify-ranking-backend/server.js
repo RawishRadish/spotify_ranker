@@ -4,11 +4,14 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+
 const pool = require('./db');
 const app = express();
 const playlistRoutes = require('./routes/playlistRoutes');
 const compareRoutes = require('./routes/compareRoutes');
+const statisticsRoutes = require('./routes/statisticsRoutes');
 const userAuthRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const spotifyAuthRoutes = require('./routes/spotifyAuthRoutes');
 const { authenticateToken } = require('./middlewares/authMiddleware');
 
@@ -19,6 +22,11 @@ app.use(cors({
     credentials: true
 }));
 app.use(session({
+    store: new (require('connect-pg-simple')(session))({
+        pool: pool,
+        tableName: 'session',
+        pruneSessionInterval: 60,
+    }),
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
     resave: false,
@@ -28,12 +36,8 @@ app.use(session({
     } // secure: true in production
 }));
 
-
-
 app.get('/', (req, res) => {
     res.send('Welcome to the Spotify Ranking API');
-    console.log(req.session);
-    console.log(req.session.id);
 });
 
 app.get('/session-test', (req, res) => {
@@ -58,8 +62,10 @@ app.get('/test-auth', authenticateToken, (req, res) => {
 
 app.use('/playlists', playlistRoutes);
 app.use('/spotify', spotifyAuthRoutes);
+app.use('/user', userRoutes);
 app.use('/pairs', compareRoutes);
 app.use('/auth', userAuthRoutes);
+app.use('/stats', statisticsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

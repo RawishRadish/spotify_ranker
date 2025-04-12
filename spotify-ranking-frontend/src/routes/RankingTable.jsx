@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { 
     useReactTable, 
     getCoreRowModel,
@@ -33,28 +34,46 @@ export default function RankingTable({ songs, searchTerm }) {
             {
                 header: "Positie",
                 accessorKey: "position",
+                cell: ({ row }) => {
+                    const sigma = row.original.sigma;
+                    return (
+                        <div className={`text-center font-semibold rounded px-2 py-1 ${getPositionColor(sigma)}`}>
+                            {row.original.position}
+                        </div>
+                    );
+                }
             },
             {
-                header: "Titel",
-                accessorKey: "title",
+                accessorKey: "album_image_url",
+                header: "",
+                cell: ({ row }) => (
+                    <img
+                        src={row.original.album_image_url}
+                        alt={`${row.original.title} cover`}
+                        className='w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-200 transition-transform duration-150 hover:scale-105'
+                        loading='lazy'
+                    />
+                ),
             },
             {
-                header: "Artiest",
-                accessorKey: "artist",
+                header: "Titel & Artiest",
+                accessorKey: "title_artist",
+                cell: ({ row }) => (
+                    <div>
+                        <div className='font-medium text-gray-900'>{row.original.title}</div>
+                        <div className='text-sm text-gray-500'>{row.original.artist}</div>
+                    </div>
+                )
             },
-            {
-                header: "Mu",
-                accessorKey: "mu",
-            }
         ], []
     );
 
     const getPositionColor = (sigma) => {
-        if (sigma > 7) return "bg-red-300"; // Very high uncertainty
-        if (sigma > 6) return "bg-orange-300"; // High uncertainty
-        if (sigma > 5) return "bg-yellow-300"; // Medium uncertainty
-        if (sigma > 3)return "bg-green-300"; // Low uncertainty
-        return "bg-blue-300"; // Very low uncertainty
+        if (sigma > 7) return "bg-red-100"; // Very high uncertainty
+        if (sigma > 6) return "bg-orange-100"; // High uncertainty
+        if (sigma > 5) return "bg-yellow-100"; // Medium uncertainty
+        if (sigma > 3)return "bg-green-100"; // Low uncertainty
+        return "bg-blue-100"; // Very low uncertainty
     };
 
 
@@ -70,8 +89,8 @@ export default function RankingTable({ songs, searchTerm }) {
 
     return (
         <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300 shadow-md rounded-md">
-                <thead className='bg-gray-200'>
+            <table className="min-w-full border-separate border-spacing-0 shadow-md rounded-md">
+                <thead className='bg-gray-200 sticky top-0 z-10'>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
@@ -80,8 +99,17 @@ export default function RankingTable({ songs, searchTerm }) {
                                     className='py-3 px-4 text-left cursor-pointer font-semibold text-gray-700'
                                     onClick={header.column.getToggleSortingHandler()}
                                 >
-                                    {flexRender(header.column.columnDef.header, header.getContext())}
-                                    {header.column.getIsSorted() === "asc" ? " ▲" : header.column.getIsSorted() === "desc" ? " ▼" : ""}
+                                    <div className='flex items-center gap-1'>
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                        {header.column.getIsSorted() === "asc" ? (
+                                            <FaSortUp />
+                                        ) : header.column.getIsSorted() === "desc" ? (
+                                            <FaSortDown /> 
+                                        ) : (
+                                            <FaSort />
+                                        )}
+                                    </div>
+
                                 </th>
                             ))}
                         </tr>
@@ -101,8 +129,7 @@ export default function RankingTable({ songs, searchTerm }) {
                             return (
                                 <td 
                                     key={cell.id} 
-                                    className={`py-2 px-4 text-gray-800
-                                        ${isPositionColumn ? getPositionColor(sigmaValue) : ""}`}
+                                    className={`border-b border-gray-200 py-2 px-4 text-gray-800 align-middle`}
                                 >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>

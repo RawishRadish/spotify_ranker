@@ -17,6 +17,23 @@ const login = async (req, res) => {
     }
 };
 
+const register = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const { accessToken, refreshToken, userId } = await authService.register(username, password);
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'None',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+        req.session.userId = userId;
+        res.status(201).json({ accessToken, username });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
 const refreshUserToken = async (req, res) => {
     try {
         const { accessToken, refreshToken, username, userId } = await authService.refreshUserToken(req.cookies.refreshToken);
@@ -42,4 +59,4 @@ const logout = async (req, res) => {
     res.sendStatus(204);
 };
 
-module.exports = { login, refreshUserToken, logout };
+module.exports = { login, register, refreshUserToken, logout };

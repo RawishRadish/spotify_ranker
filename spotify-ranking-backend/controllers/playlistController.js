@@ -1,5 +1,4 @@
 const playlistService = require('../services/playlistService');
-const spotifyRequest = require('../middlewares/spotifyRequest');
 
 // Fetch all playlists from the database
 const getAllPlaylists = async (req, res) => {
@@ -15,14 +14,9 @@ const getAllPlaylists = async (req, res) => {
 
 // Save selected playlists from the Spotify user to the database
 const savePlaylists = async (req, res) => {
-    const userId = req.session.userId;
-    const { playlistIds } = req.body;
     try {
-        for (const playlistId of playlistIds) {
-            const playlistData = await spotifyRequest(req, `playlists/${playlistId}`);
-            await playlistService.savePlaylistToDb(playlistData, userId);
-        }
-        res.status(201).send('Playlists saved');
+        await playlistService.processAndSavePlaylists(req);
+        res.status(201).send('Playlists and songs saved');
     } catch (error) {
         console.error('Error saving playlists:', error);
         res.status(500).send('Error saving playlists');
@@ -40,18 +34,29 @@ const getPlaylists = async (req, res) => {
     }
 }
 
-// Save all songs from a playlist to the database
-const savePlaylistSongs = async (req, res) => {
+// Update a playlist to the database
+const updatePlaylist = async (req, res) => {
+    const { playlistId } = req.params;
+    try {
+        const { updated, message } = await playlistService.updatePlaylist(req, playlistId);
+        res.status(200).json({ updated, message });
+    } catch (error) {
+        console.error('Error updating playlist:', error);
+        res.status(500).json({ error: 'Error updating playlist' });
+    }
+};
+
+// Delete a playlist from the database
+const deletePlaylist = async (req, res) => {
     const playlistId = req.params.id;
     try {
-        const allTracks = await playlistService.getPlaylistSongs(req, playlistId);
-        await playlistService.savePlaylistSongsToDb(allTracks, playlistId);
-        res.status(201).send('Songs saved');
+        await playlistService.deletePlaylistFromDb(playlistId);
+        res.status(200).send('Playlist deleted');
     } catch (error) {
-        console.error('Error saving songs:', error);
-        res.status(500).send('Error saving songs');
+        console.error('Error deleting playlist:', error);
+        res.status(500).send('Error deleting playlist');
     }
-}
+};
 
 // Get the playlist ranked by openskill rating (best to worst)
 const getRankedPlaylist = async (req, res) => {
@@ -71,19 +76,23 @@ const getPlaylistInfo = async (req, res) => {
     const { id: playlistId } = req.params;
     try {
         const response = await playlistService.getPlaylistInfo(req, playlistId);
-        res.json(response);
+        res.json({
+            playlistInfo: response,
+            totalTracks: response.tracks?.total,
+        });
     } catch (error) {
         console.error('Error in controller:', error);
         res.status(500).json({ error: 'Error fetching playlist info' });
     }
-}
+};
 
 // Export the functions
 module.exports = {
     getAllPlaylists,
     getPlaylists,
     savePlaylists,
-    savePlaylistSongs,
+    deletePlaylist,
     getRankedPlaylist,
     getPlaylistInfo,
+    updatePlaylist,
 };

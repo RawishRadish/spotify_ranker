@@ -6,7 +6,6 @@ export const AuthContext = createContext();
 
 //Share state with all components
 export const AuthProvider = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
 
@@ -40,6 +39,15 @@ export const AuthProvider = ({ children }) => {
         });
     };
 
+    const register = async (username, password) => {
+        const { data } = await api.post('/auth/register', { username, password });
+        setAuthToken(data.accessToken);
+        setUser({
+            username: data.username,
+            loggedIn: true,
+        });
+    };
+
     const logout = async () => {
         await api.post('/auth/logout');
         setAuthToken(null);
@@ -47,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, checkAuth }}>
+        <AuthContext.Provider value={{ user, register, login, logout, loading, checkAuth }}>
             {children}
         </AuthContext.Provider>
     );
