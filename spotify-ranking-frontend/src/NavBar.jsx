@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/UserAuthContext';
 import { useSpotifyAuth } from './context/SpotifyAuthContext';
 import { usePlaylist } from './context/PlaylistContext';
+import Logo from './assets/logo.svg?react';
 
 const NavBar = () => {
     const [ menuOpen, setMenuOpen ] = useState(false);
@@ -27,7 +28,9 @@ const NavBar = () => {
         <div className='container mx-auto flex justify-between items-center h-full'>
 
           {/* Logo */}
-          <div className='text-xl font-bold'>Spotify Ranker</div>
+          <div className='text-xl font-bold h-full'>
+            <Logo className='h-full w-auto'/>
+          </div>
 
           {/* Links for desktop */}
           <div className='hidden md:flex space-x-6'>

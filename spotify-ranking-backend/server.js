@@ -9,6 +9,7 @@ const pool = require('./db');
 const app = express();
 const playlistRoutes = require('./routes/playlistRoutes');
 const compareRoutes = require('./routes/compareRoutes');
+const songRoutes = require('./routes/songsRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes');
 const userAuthRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -66,6 +67,7 @@ app.use('/user', userRoutes);
 app.use('/pairs', compareRoutes);
 app.use('/auth', userAuthRoutes);
 app.use('/stats', statisticsRoutes);
+app.use('/songs', songRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -6,7 +6,6 @@ const { authenticateToken } = require('../middlewares/authMiddleware');
 router.get('/getfromdb', authenticateToken, playlistController.getAllPlaylists);
 router.get('/info/:id', authenticateToken, playlistController.getPlaylistInfo);
 router.post('/save', authenticateToken, playlistController.savePlaylists);
-//router.post('/save/:id/songs', authenticateToken, playlistController.savePlaylistSongs);
 router.get('/ranked/:playlist_id', authenticateToken, playlistController.getRankedPlaylist);
 router.delete('/delete/:id', authenticateToken, playlistController.deletePlaylist);
 router.patch('/update/:playlistId', authenticateToken, playlistController.updatePlaylist);

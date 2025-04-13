@@ -7,33 +7,8 @@ const SongCard = ({ song, opponent, onChoose }) => {
     const [externalUrl, setExternalUrl] = useState(null);
 
     useEffect(() => {
-        const getAlbumArtUrl = async () => {
-            console.log('Getting album art for:', song);
-            try {
-                const response = await api.post('/pairs/album-art', {
-                    song: song,
-                });
-                setArtUrl(response.data);
-            } catch (error) {
-                console.error('Error getting album art:', error);
-            }
-        }
-
-        const getExternalUrl = async () => {
-            console.log('Getting external URL for:', song);
-            try {
-                const response = await api.post('/pairs/external-url', {
-                    song: song,
-                });
-                console.log('External URL:', response.data);
-                setExternalUrl(response.data);
-            } catch (error) {
-                console.error('Error getting external URL:', error);
-            }
-        }
-
-        getAlbumArtUrl();
-        getExternalUrl();
+        setArtUrl(song.albumImageUrl);
+        setExternalUrl(song.externalUrl);
     }, [song]);
 
     const handleClick = () => {

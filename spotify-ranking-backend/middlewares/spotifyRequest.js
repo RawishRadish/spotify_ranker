@@ -34,8 +34,8 @@ const spotifyRequest = async (req, endpoint, {
         const response = await axios(config);
         return response.data;
     } catch (error) {
-        console.error(`Spotify request error (${method} ${endpoint}):`, error);
-        throw new Error('Error making request to Spotify API');
+        console.error(`Spotify API error: `, error.response?.status, error.response?.data || error.message);
+        throw new Error(`Spotify API error: ${error.response?.status || error.message}`);
     }
 };
 

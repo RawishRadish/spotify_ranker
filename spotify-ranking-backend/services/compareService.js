@@ -4,6 +4,16 @@ const { updateRatings } = require('./openskillService');
 // Fetch pairs of songs to compare
 const fetchSongPairs = async (playlist_id) => {
 
+    const songFields = ['id', 'title', 'artist', 'mu', 'album_image_url', 'external_url'];
+
+    const generateSelectFields = (alias1, prefix1, alias2, prefix2) => {
+        return songFields.map(field =>
+            `${alias1}.${field} AS ${prefix1}_${field}, ${alias2}.${field} AS ${prefix2}_${field}`
+        ).join(', ');
+    };
+
+    const selectClause = generateSelectFields('s1', 'song1', 's2', 'song2');
+
     // Fetch songs with low sigma value (unranked songs)
     const unrankedSongs = await db.query(`
         WITH filtered_songs AS (
@@ -13,10 +23,7 @@ const fetchSongPairs = async (playlist_id) => {
             ORDER BY sigma DESC
             LIMIT 50
         )
-        SELECT 	s1.id AS song1_id, s2.id AS song2_id,
-                s1.title AS song1_title, s2.title AS song2_title,
-                s1.artist AS song1_artist, s2.artist AS song2_artist,
-                s1.mu AS song1_mu, s2.mu AS song2_mu
+        SELECT 	${selectClause}
         FROM filtered_songs s1
         JOIN LATERAL (
             SELECT * FROM songs s2
@@ -38,10 +45,7 @@ const fetchSongPairs = async (playlist_id) => {
             ORDER BY random()
             LIMIT 30
         )
-        SELECT	s1.id AS song1_id, s2.id AS song2_id,
-                s1.title AS song1_title, s2.title AS song2_title,
-                s1.artist AS song1_artist, s2.artist AS song2_artist,
-                s1.mu AS song1_mu, s2.mu AS song2_mu
+        SELECT	${selectClause}
         FROM 	selected_songs s1
         JOIN LATERAL (
             SELECT * FROM songs s2
@@ -63,10 +67,7 @@ const fetchSongPairs = async (playlist_id) => {
             ORDER BY random()
             LIMIT 30
         )
-        SELECT	s1.id AS song1_id, s2.id AS song2_id,
-                s1.title AS song1_title, s2.title AS song2_title,
-                s1.artist AS song1_artist, s2.artist AS song2_artist,
-                s1.mu AS song1_mu, s2.mu AS song2_mu
+        SELECT	${selectClause}
         FROM 	selected_songs s1
         JOIN LATERAL (
             SELECT * FROM songs s2
@@ -89,10 +90,7 @@ const fetchSongPairs = async (playlist_id) => {
                 ORDER BY random()
                 LIMIT 30
             )
-            SELECT	s1.id AS song1_id, s2.id AS song2_id,
-                    s1.title AS song1_title, s2.title AS song2_title,
-                    s1.artist AS song1_artist, s2.artist AS song2_artist,
-                    s1.mu AS song1_mu, s2.mu AS song2_mu
+            SELECT	${selectClause}
             FROM 	selected_songs s1
             JOIN LATERAL (
                 SELECT * FROM songs s2
@@ -116,13 +114,17 @@ const fetchSongPairs = async (playlist_id) => {
             id: pair.song1_id,
             title: pair.song1_title,
             artist: pair.song1_artist,
-            mu: pair.song1_mu
+            mu: pair.song1_mu,
+            albumImageUrl: pair.song1_album_image_url,
+            externalUrl: pair.song1_external_url
         },
         song2: {
             id: pair.song2_id,
             title: pair.song2_title,
             artist: pair.song2_artist,
-            mu: pair.song2_mu
+            mu: pair.song2_mu,
+            albumImageUrl: pair.song2_album_image_url,
+            externalUrl: pair.song2_external_url
         }
     }))
 

@@ -30,14 +30,15 @@ const saveOrUpdateTracks = async (tracks, playlistId) => {
         await client.query('BEGIN');
         // Basic query to insert or update tracks
         const query = `
-            INSERT INTO songs (spotify_song_id, title, artist, playlist_id, genres, album_image_url)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO songs (spotify_song_id, title, artist, playlist_id, genres, album_image_url, external_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (spotify_song_id, playlist_id)
             DO UPDATE 
                 SET title = EXCLUDED.title, 
                 artist = EXCLUDED.artist, 
                 genres = EXCLUDED.genres,
-                album_image_url = EXCLUDED.album_image_url
+                album_image_url = EXCLUDED.album_image_url,
+                external_url = EXCLUDED.external_url
             `;
 
         // For each track, execute the query
@@ -45,7 +46,8 @@ const saveOrUpdateTracks = async (tracks, playlistId) => {
             const { id, name, artists, genres } = track.track;
             const artist = artists.map(artist => artist.name).join(', ');
             const albumImageUrl = track.track.album.images[0]?.url || null;
-            const res = await client.query(query, [id, name, artist, playlistId, genres, albumImageUrl]);
+            const externalUrl = track.track.external_urls?.spotify || null;
+            const res = await client.query(query, [id, name, artist, playlistId, genres, albumImageUrl, externalUrl]);
             if (res.rowCount > 0) {
                 console.log(`Track ${name} inserted/updated successfully`);
             }
@@ -125,6 +127,21 @@ const getSigmaPerSong = async (playlistId) => {
     }
 };
 
+// Get info about one specific song of a playlist, like the album image URL or the external URL
+const getSongInfo = async (songId, playlistId) => {
+    try {
+        const result = await db.query(`
+            SELECT *
+            FROM songs
+            WHERE playlist_id = $1
+            AND id = $2`, [playlistId, songId]);
+        return result.rows;
+    } catch (error) {
+        console.error('Error fetching song info from database: ', error);
+        throw error;
+    }
+};
+
 // Export the functions
 module.exports = {
     getTracksByPlaylistId,
@@ -134,4 +151,5 @@ module.exports = {
     getArtistCount,
     getTotalComparisons,
     getSigmaPerSong,
+    getSongInfo,
 };

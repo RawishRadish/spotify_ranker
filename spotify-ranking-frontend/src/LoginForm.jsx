@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from './context/UserAuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import LogoNoText from './assets/LogoNoText.svg?react';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -35,9 +36,10 @@ const LoginForm = () => {
         <div className='flex justify-center items-center min-h-screen bg-gray-100 px-4'>
                 <form 
                     onSubmit={handleSubmit}
-                    className='bg-white p-6 rounded-2xl shadow-md w-full max-w-md space-y-4'
+                    className='relative bg-white p-6 rounded-2xl shadow-md w-full max-w-md space-y-4'
                 >
                 <h2 className='text-2xl font-bold text-center text-gray-800'>Inloggen</h2>
+                
                 <input
                     type="text"
                     placeholder="Gebruikersnaam"

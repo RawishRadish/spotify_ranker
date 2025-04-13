@@ -3,27 +3,35 @@ import api from '../axiosConfig';
 import { usePlaylist } from '../context/PlaylistContext';
 import { useAudio } from '../context/AudioContext';
 import SongCard from './SongCard';
+import CompareModal from './Modals/CompareModal';
 
 function CompareSongs() {
+    const [loading, setLoading] = useState(true);
     const [pairs, setPairs] = useState([]);
     const [currentPairIndex, setCurrentPairIndex] = useState(0);
+    const [showModal, setShowModal] = useState(false);
     const [lastChoice, setLastChoice] = useState(null);
     const { playlistId } = usePlaylist();
     const { stop } = useAudio();
+
+    const fetchPairs = async () => {
+        setLoading(true);
+        try{
+            const response = await api.get(`/pairs/fetch/${playlistId}`);
+            console.log('Fetched pairs:', response.data);
+            setPairs(response.data);
+        } catch (error) {
+            console.error('Error fetching pairs: ', error);
+        } finally {
+            setCurrentPairIndex(0);
+            setLoading(false);
+        }
+    }
 
     useEffect(() => {
         // Reset pairs to empty array
         setPairs([]);
         // Fetch pairs
-        async function fetchPairs() {
-            try {
-                const response = await api.get(`/pairs/fetch/${playlistId}`);
-                console.log('Fetched pairs:', response.data);
-                setPairs(response.data);
-            } catch (error) {
-                console.error('Error fetching pairs:', error);
-            }
-        }
         fetchPairs();
     }, [playlistId]);
 
@@ -40,6 +48,7 @@ function CompareSongs() {
                     setCurrentPairIndex(currentPairIndex + 1);
                 } else {
                     console.log('No more pairs in current batch');
+                    setShowModal(true);
                 }
             })
             .catch(error => console.error('Error updating ratings:', error));
@@ -57,11 +66,17 @@ function CompareSongs() {
             .catch(error => console.error('Error undoing choice:', error));
     };
 
-    if (pairs.length === 0) {
-        return <div className='flex items-center justify-center h-screen text-gray-600'>Loading pairs...</div>;
-    }
-
     const currentPair = pairs[currentPairIndex];
+
+    if (loading) {
+        return (
+            <p>Loading song pairs...</p>
+        )
+    }    
+    
+    if (pairs.length === 0) {
+        return <div className='flex items-center justify-center h-screen text-gray-600'>No pairs could be made...</div>;
+    }
 
     return (
         <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-4 py-8'>
@@ -74,6 +89,14 @@ function CompareSongs() {
                     <SongCard song={currentPair.song2} opponent={currentPair.song1} onChoose={handleChoice} />
                 </div>
             </div>
+
+            {/* Modal after completed batch */}
+            {showModal && (
+                <CompareModal 
+                    onClose={() => setShowModal(false)}
+                    fetchSongs={fetchPairs}
+                />
+            )}
 
             {/* Buttons */}
             <div className='mt-6 flex flex-wrap gap-4 justify-center'>

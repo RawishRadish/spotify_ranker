@@ -42,47 +42,22 @@ const undoComparison = async (req, res) => {
     }
 };
 
-// Find preview of songs
-const getPreviewUrl = async (req, res) => {
-    const { songs } = req.body;
-    if (!Array.isArray(songs) || songs.length === 0) {
-        return res.status(400).json({ error: 'No songs provided' });
-    }
+// // Find preview of songs
+// const getPreviewUrl = async (req, res) => {
+//     const { songs } = req.body;
+//     if (!Array.isArray(songs) || songs.length === 0) {
+//         return res.status(400).json({ error: 'No songs provided' });
+//     }
 
-    console.log('Songs in Controller:', songs);
+//     console.log('Songs in Controller:', songs);
     
-    const previews = await previewService.getPreviewUrl(songs);
-    console.log('Previews in Controller:', previews);
-    res.json(previews);
-};
-
-// Find album art of songs
-const getAlbumArtUrl = async (req, res) => {
-    const { song } = req.body;
-    if (!song) {
-        return res.status(400).json({ error: 'No song provided' });
-    }
-
-    const albumArtUrl = await previewService.getAlbumArtUrl(req, song);
-    res.json(albumArtUrl);
-};
-
-// Find external URL of songs
-const getExternalUrl = async (req, res) => {
-    const { song } = req.body;
-    if (!song) {
-        return res.status(400).json({ error: 'No song provided' });
-    }
-
-    const externalUrl = await previewService.getExternalUrl(req, song);
-    res.json(externalUrl);
-};
+//     const previews = await previewService.getPreviewUrl(songs);
+//     console.log('Previews in Controller:', previews);
+//     res.json(previews);
+// };
 
 module.exports = {
     getSongPairs,
     compareSongs,
     undoComparison,
-    getPreviewUrl,
-    getAlbumArtUrl,
-    getExternalUrl
 };

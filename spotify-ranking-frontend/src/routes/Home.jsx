@@ -13,6 +13,7 @@ const Home = () => {
     }
 
     return (
+
         <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200'>
             {!spotifyUser?.connected && (
                 <div className='items-center justify-center flex flex-col bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-md'>

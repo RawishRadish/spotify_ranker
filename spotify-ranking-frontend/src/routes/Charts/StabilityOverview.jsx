@@ -31,7 +31,7 @@ const StabilityOverview = ({ playlistId, topN = 10, showTitle = true, inModal = 
 
     
     return (
-        <div className='h-full bg-white rounded-xl shadow-md p-6'>
+        <div className='h-full w-full bg-white rounded-xl shadow-md p-6'>
             {showTitle && (
                 <h2 className='text-xl font-semibold mb-4'>Stabiliteit per nummer</h2>
             )}

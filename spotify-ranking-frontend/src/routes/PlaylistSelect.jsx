@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../axiosConfig';
 import { usePlaylist } from '../context/PlaylistContext';
-import PlaylistModal from './PlaylistModal';
+import PlaylistModal from './Modals/PlaylistModal';
 import { HiCheckCircle, HiPencilAlt, HiTrash } from 'react-icons/hi';
 import {
     useReactTable,
@@ -83,7 +83,7 @@ const PlaylistSelect =  () => {
                         const res = await api.get(`/playlists/info/${playlist.id}`);
                         return {
                             ...playlist,
-                            imageUrl: res.data.images[0].url
+                            imageUrl: res.data.playlistInfo.images[0].url
                         };
                     } catch (error) {
                         console.error('Error fetching playlist image:', error);
